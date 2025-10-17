@@ -77,7 +77,7 @@ exports.getChatHistory = async (req, res) => {
 exports.getPrivateChatSessions = async (req, res) => {
     try {
         const userId = req.user.id;
-        
+
         // 查找与当前用户有关的所有私聊消息（作为发送者或接收者）
         const messages = await Message.findAll({
             where: {
@@ -97,22 +97,22 @@ exports.getPrivateChatSessions = async (req, res) => {
             },
             attributes: ['sender_id', 'receiver_id'],
             include: [
-                { 
-                    model: User, 
-                    as: 'sender', 
-                    attributes: ['id', 'username', 'display_name'] 
+                {
+                    model: User,
+                    as: 'sender',
+                    attributes: ['id', 'username', 'display_name']
                 },
-                { 
-                    model: User, 
-                    as: 'receiver', 
-                    attributes: ['id', 'username', 'display_name'] 
+                {
+                    model: User,
+                    as: 'receiver',
+                    attributes: ['id', 'username', 'display_name']
                 }
             ]
         });
-        
-        // 提取所有与当前用户私聊过的用户
+
+        // 提取所有与当前用户私聊过的用户，map可以避免重复,自动过滤掉同一个用户的重复条目.
         const chatPartners = new Map();
-        
+
         messages.forEach(msg => {
             // 如果当前用户是发送者，添加接收者
             if (msg.sender_id === userId && msg.receiver) {
@@ -123,7 +123,7 @@ exports.getPrivateChatSessions = async (req, res) => {
                 chatPartners.set(msg.sender.id, msg.sender);
             }
         });
-        
+
         // 转换为数组并返回
         const sessions = Array.from(chatPartners.values());
         res.json(sessions);

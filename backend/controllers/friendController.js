@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Friend = require('../models/Friend');
 const FriendRequest = require('../models/FriendRequest');
+const { Op } = require('sequelize');
 
 // 获取用户列表（支持搜索）
 exports.getUsers = async (req, res) => {
@@ -8,14 +9,14 @@ exports.getUsers = async (req, res) => {
         const { search } = req.query;
         const whereClause = {
             id: {
-                [require('sequelize').Op.ne]: req.user.id
+                [Op.ne]: req.user.id
             }
         };
 
         if (search) {
-            whereClause[require('sequelize').Op.or] = [
-                { username: { [require('sequelize').Op.like]: `%${search}%` } },
-                { display_name: { [require('sequelize').Op.like]: `%${search}%` } }
+            whereClause[Op.or] = [
+                { username: { [Op.like]: `%${search}%` } },
+                { display_name: { [Op.like]: `%${search}%` } }
             ];
         }
 
@@ -50,7 +51,7 @@ exports.sendFriendRequest = async (req, res) => {
         // 检查是否已经是好友
         const existingFriend = await Friend.findOne({
             where: {
-                [require('sequelize').Op.or]: [
+                [Op.or]: [
                     {
                         user_id: currentUserId,
                         friend_id: targetUserId
